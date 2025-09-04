@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: sample-webapp
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+
+labels:
+  - name: app
+    value: sample-webapp
+  - name: environment
+    value: demo
+
+images:
+  - name: nginx
+    newTag: 1.25-alpine
+
+replicas:
+  - name: sample-webapp
+    count: 3
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: sample-webapp
+    spec:
+      template:
+        metadata:
+          labels:
+            version: v1.0.0

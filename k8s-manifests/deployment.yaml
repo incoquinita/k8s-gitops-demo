@@ -1,0 +1,189 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-webapp
+  namespace: default
+  labels:
+    app: sample-webapp
+    version: v1.0.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sample-webapp
+  template:
+    metadata:
+      labels:
+        app: sample-webapp
+        version: v1.0.0
+    spec:
+      containers:
+      - name: webapp
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: html-content
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-content
+        configMap:
+          name: webapp-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webapp-content
+  namespace: default
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>GitOps Demo App</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+            }
+            .container { 
+                max-width: 900px; 
+                margin: 0 auto; 
+                padding: 40px 20px;
+                text-align: center;
+            }
+            .card { 
+                background: rgba(255,255,255,0.15);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 40px;
+                margin: 20px 0;
+                box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
+            h1 { 
+                font-size: 3em; 
+                margin-bottom: 20px; 
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            }
+            .status-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin: 30px 0;
+            }
+            .status-item { 
+                background: rgba(255,255,255,0.1);
+                padding: 20px;
+                border-radius: 10px;
+                transition: transform 0.3s ease;
+            }
+            .status-item:hover {
+                transform: translateY(-5px);
+            }
+            .emoji { font-size: 2em; margin-bottom: 10px; }
+            .tech-stack {
+                display: flex;
+                justify-content: center;
+                gap: 30px;
+                flex-wrap: wrap;
+                margin: 30px 0;
+            }
+            .tech-item {
+                background: rgba(255,255,255,0.2);
+                padding: 15px 25px;
+                border-radius: 50px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+            .tech-item:hover {
+                background: rgba(255,255,255,0.3);
+                transform: scale(1.1);
+            }
+            .version {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(255,255,255,0.2);
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 0.9em;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="version">v1.0.0</div>
+        <div class="container">
+            <div class="card">
+                <h1>🚀 GitOps Demo Application</h1>
+                <p style="font-size: 1.2em; margin-bottom: 30px; opacity: 0.9;">
+                    Aplicação rodando em Kubernetes com deploy automatizado via ArgoCD
+                </p>
+                
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="emoji">✅</div>
+                        <strong>Status</strong><br>
+                        Online & Healthy
+                    </div>
+                    <div class="status-item">
+                        <div class="emoji">🔒</div>
+                        <strong>Security</strong><br>
+                        TLS Enabled
+                    </div>
+                    <div class="status-item">
+                        <div class="emoji">🔄</div>
+                        <strong>Deployment</strong><br>
+                        GitOps Automated
+                    </div>
+                    <div class="status-item">
+                        <div class="emoji">☸️</div>
+                        <strong>Platform</strong><br>
+                        Kubernetes
+                    </div>
+                </div>
+                
+                <div class="tech-stack">
+                    <div class="tech-item">AWS EKS</div>
+                    <div class="tech-item">ArgoCD</div>
+                    <div class="tech-item">NGINX Ingress</div>
+                    <div class="tech-item">Kubernetes</div>
+                    <div class="tech-item">GitOps</div>
+                </div>
+                
+                <p style="margin-top: 30px; opacity: 0.8;">
+                    🎯 Esta aplicação demonstra um pipeline completo de GitOps<br>
+                    📝 Qualquer mudança no Git é automaticamente sincronizada pelo ArgoCD
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
